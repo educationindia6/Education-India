@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 
 export async function POST(req:NextApiRequest){
- const {id,collegeName,examScore,examType,additionalDetails}=(await req.json())
+ const {id,collegeName,examScore,examType,additionalDetails,opted}=(await req.json())
  console.log(id.id,collegeName,examScore,examType,additionalDetails)
  try{
  const user =await prisma.user.findUnique({
@@ -22,9 +22,10 @@ export async function POST(req:NextApiRequest){
     data:{
         userId:user?.id,
         collegeId:college?.id,
-        Aditional:additionalDetails,
+        additional:additionalDetails,
         examScore:parseInt(examScore),
-        examType:examType
+        examType:examType,
+        opted:opted
 
         
     }

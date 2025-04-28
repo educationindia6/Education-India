@@ -8,6 +8,9 @@ export  async function POST(req: NextApiRequest) {
     const user=await prisma.user.findUnique({
         where:{
             id:id
+        },
+        include:{
+            messages:true
         }
     })
 

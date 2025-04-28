@@ -14,7 +14,6 @@ export async function POST(req: NextApiRequest, res: NextApiResponse) {
             phoneNumber:formData.mobile,
             aadharNo:formData.aadharNo,
             category:formData.category,
-            course:formData.course,
             dob:new Date(formData.dob),
             idMark:formData.idMark,
             motherName:formData.motherName,

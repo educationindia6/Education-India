@@ -14,30 +14,40 @@ model User {
   password          String?
   profileCompleted  Boolean             @default(false)
   phoneNumber       String?
-  emailVerified     Boolean @default(false)
+  emailVerified     Boolean             @default(false)
   image             String?
   accounts          Account[]
   sessions          Session[]
-  aadharNo              String?    @unique
-  address               String?
-  bloodGroup            String?
-
-  category              String?
-  course                String?
-  dob                   DateTime?
-  fatherName            String?
-  motherName            String?
-   maritalStatus         String?
-  idMark                String?
+  aadharNo          String?             @unique
+  address           String?
+  bloodGroup        String?
+  category          String?
+  dob               DateTime?
+  fatherName        String?
+  motherName        String?
+  maritalStatus     String?
+  idMark            String?
   VerificationToken VerificationToken[]
-   session               String?
-  university            String?
-  documents             Documents? @relation(fields: [documentsId], references: [id])
-  documentsId           String?    @unique
- applications Application[] // Relation to applications
-  enrollments Enrollment[]  // Relation to enrollments
-  createdAt             DateTime?   @default(now())
-  updatedAt             DateTime ?  @updatedAt
+  session           String?
+  university        String?
+  documents         Documents?          @relation(fields: [documentsId], references: [id])
+  documentsId       String?             @unique
+  applications      Application[]       // Relation to applications
+  enrollments       Enrollment[]        // Relation to enrollments
+  messages          Message[]           // Relation to messages
+  courseEnrollments CourseEnrollment[]   // Relation to course enrollments
+  createdAt         DateTime?           @default(now())
+  updatedAt         DateTime?           @updatedAt
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  content     String
+  sentAt      DateTime @default(now())
+  collegeId   String
+  recipientId String
+  college     College  @relation(fields: [collegeId], references: [id]) // Relation to College (sender)
+  recipient   User     @relation(fields: [recipientId], references: [id]) // Relation to User (recipient)
 }
 
 model Account {
@@ -59,8 +69,8 @@ model Session {
 
 model VerificationToken {
   id        String    @default(cuid())
-  token     String @unique
-  user      User   @relation(fields: [id], references: [id])
+  token     String    @unique
+  user      User      @relation(fields: [id], references: [id])
   expires   DateTime
 }
 
@@ -69,64 +79,109 @@ model Documents {
   tenthMarksheet         String?
   twelfthMarksheet       String?
   graduationMarksheet    String?
-  lastDegreeCertificate  String?
-  technicalQualifications String?
+  lastDegreeCertificate   String?
+
   
-  student               User?
+ student               User?
 
-  createdAt             DateTime   @default(now())
-  updatedAt             DateTime   @updatedAt
+ createdAt             DateTime   @default(now())
+ updatedAt             DateTime   @updatedAt
 
-  @@map("documents")
+ @@map("documents")
 }
+
 model College {
-  id           String     @id @default(cuid())
-  password     String     @default("1234")
-  name         String     @unique
-  nirfRanking  Int?
-  location     String?
-  degreeModes  Mode[]
+    id           String     @id @default(cuid())
+    password     String     @default("1234")
+    name         String     @unique
+    nirfRanking   Int?
+    location     String?
 
-  courses      String[]   // Array of course names
-  createdAt    DateTime   @default(now())
-  applications Application[] // Relation to applications
-  enrollments Enrollment[]  // Relation to enrollments
-  updatedAt    DateTime   @updatedAt
+    messages      Message[] 
+    courses       Course[]    // Relation to Course model
+  
+    createdAt    DateTime   @default(now())
+    applications Application[] // Relation to applications
+    enrollments Enrollment[] // Relation to enrollments
+    updatedAt    DateTime   @updatedAt
 
-  @@map("colleges")
+    @@map("colleges")
 }
+
+// New Course Model for Managing Courses in Colleges
+model Course {
+    id          String      @id @default(cuid())
+    name        String      // Name of the course (e.g., "Computer Science")
+    description String?     // Optional description of the course
+    
+    collegeId   String      // Foreign key to College
+    college     College     @relation(fields: [collegeId], references: [id])
+
+    students    CourseEnrollment[] // Relation to CourseEnrollment
+   mode Mode[]
+    // New relation for applications that include this course
+applications Application[] @relation("ApplicationCourses")
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+
+    @@map("courses")
+}
+
+
+// New CourseEnrollment Model for Managing Student Enrollments in Courses
+
 
 model Application {
-  id         String   @id @default(cuid())
-  user       User     @relation(fields: [userId], references: [id])
-  userId     String
-  college    College  @relation(fields: [collegeId], references: [id])
-  collegeId  String
-  status     ApplicationStatus @default(PENDING) // Status of the application
-  examType   String
-  examScore Int
-  Aditional String
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+    id         String   @id @default(cuid())
+    user       User     @relation(fields: [userId], references: [id])
+    userId     String
+    college    College   @relation(fields: [collegeId], references: [id])
+    collegeId  String
+    status     ApplicationStatus @default(PENDING)
+    examType   String
+    examScore  Int
+    additional String?
+    opted      String
+    
+    // Correct relation to courses offered by the specific college
+    optedCourses Course[] @relation("ApplicationCourses")
+    
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
 }
+
 
 model Enrollment {
-  id         String   @id @default(cuid())
-  user       User     @relation(fields: [userId], references: [id])
-  userId      String  
-  college    College  @relation(fields: [collegeId], references: [id])
-  collegeId  String
-  enrolledAt DateTime @default(now())
-  @@unique([userId, collegeId]) 
+    id         String   @id @default(cuid())
+    user       User     @relation(fields: [userId], references: [id])
+    userId     String  
+    college    College  @relation(fields: [collegeId], references: [id])
+    collegeId  String
+    enrolledAt DateTime @default(now())
+    courseEnrollments CourseEnrollment[] // One-to-many relation with CourseEnrollment
+
+    @@unique([userId, collegeId]) 
 }
 
+model CourseEnrollment {
+    id           String   @id @default(cuid())
+    userId       String   // Foreign key to User (student)
+    courseId     String   // Foreign key to Course
+    enrollmentId String   // Foreign key to Enrollment
+    
+    user         User     @relation(fields: [userId], references: [id])
+    course       Course   @relation(fields: [courseId], references: [id])
+    enrollment   Enrollment @relation(fields: [enrollmentId], references: [id])
+   
+    @@unique([userId, courseId]) // Ensure unique enrollment per student per course
+}
 enum ApplicationStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
+    PENDING
+    ACCEPTED
+    REJECTED
 }
 enum Mode {
-  Offline
-  Online
-  Hybrid
+    Offline
+    Online
+    Hybrid
 }

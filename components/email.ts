@@ -2,6 +2,7 @@
 import jwt from "jsonwebtoken"
 import nodemailer from 'nodemailer';
 async function sendMail(email:string,token:any){
+
 let testAccount = await nodemailer.createTestAccount();
   console.log("Thodere din me dekhegi")
 
@@ -99,4 +100,5 @@ let testAccount = await nodemailer.createTestAccount();
   console.log("Message sent: %s", info.messageId);
 
 }
+
 export {sendMail}

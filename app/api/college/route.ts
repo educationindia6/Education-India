@@ -6,7 +6,17 @@ import prisma from '../../../prisma/prisma';
 export async function GET(request: Request) {
    
     try {
-        const colleges = await prisma.college.findMany();
+        const colleges = await prisma.college.findMany({
+            include:{
+                courses:true,
+                enrollments:{
+                    include:{
+                        courseEnrollments:true
+                    }
+                }
+            }
+        });
+
         return NextResponse.json({"college":colleges});
       } catch (error) {
         console.log(error)
@@ -28,10 +38,13 @@ export async function GET(request: Request) {
                 },
                 enrollments:{
                     include:{
-                        user:true
+                        user:true,
+                        courseEnrollments:true
 
                     }
-                }
+                },
+
+                courses:true
             }
          
         })
@@ -97,15 +110,35 @@ export async function GET(request: Request) {
 //       parser.write(fileContent);
 //       parser.end();
 //     });
-//     const collegesWithNullLocation = await prisma.college.findMany({
-//         where: {
-//           location: null,
-//         },
-//       });
+    
       
-//       collegesWithNullLocation.forEach((el)=>{
-//         console.log(el.name)
+     
+//         records.forEach(async (el)=>{
+//             console.log(el.Name)
+//             console.log(el["Degree Modes"])
+//             console.log(el["NIRF Ranking 2023"])
+//             console.log(el)
+//             try{
+//              await  prisma.college.update({
+               
+//                 where:{
+//                     name:el.Name,
+                   
+    
+//                 },
+//                 data:{
+//                     courses:el["Courses Offered"].split(";")
+//                 }
+    
+//             })
+//         }
+//         catch(e){
+//             console.log("ok")
+//         }
+//         // Get URL parameters for filtering and pagination
+    
 //       })
+   
 //     const { searchParams } = new URL(request.url);
 //     const page = parseInt(searchParams.get('page') ?? '1', 10);
 //     const search = searchParams.get('search')?.toLowerCase() ?? '';
@@ -123,13 +156,9 @@ export async function GET(request: Request) {
  
 
 //     return NextResponse.json({
-//       data: paginatedRecords,
-//       metadata: {
-//         total: filteredRecords.length,
-//         page,
-//         limit,
-//         totalPages: Math.ceil(filteredRecords.length / limit),
-//       },
+//       data:{
+//         "hell Yeah":"hell Yeah"
+//       }
 //     });
 //   } catch (error: any) {
 //     console.error('Failed to read colleges:', error);

@@ -14,17 +14,19 @@ const Colleges = (id) => {
   const [examScore, setExamScore] = useState("");
   const [examType, setExamType] = useState("JEE Mains");
   const [additionalDetails, setAdditionalDetails] = useState("");
-
+  const [selectedCourse,setSelectedCourse]=useState(null);
+  
   useEffect(() => {
     const fetchColleges = async () => {
       const res = await fetch("/api/college");
       const data = await res.json();
-      setColleges(
+      
+    setColleges(
         data.college.map((college) => ({
           ...college,
           applicationStatus:
             Math.random() < 2 ? "Apply Now" : "Application Closed",
-        }))
+          }))
       );
       setFilteredColleges(
         data.college.map((college) => ({
@@ -39,6 +41,9 @@ const Colleges = (id) => {
   }, []);
 
   const handleSearch = (value) => {
+  colleges.forEach(el=>{
+    console.log(el)
+  })  
     setSearch(value);
     filterAndSort(value, filterMode, degreeType, sortOrder);
   };
@@ -93,7 +98,9 @@ const Colleges = (id) => {
     setExamScore("");
     setExamType("JEE Mains");
     setAdditionalDetails("");
+    alert(selectedCourse)
     const res=await axios.post('/api/college/apply',{
+      opted:selectedCourse,
         id:id,
         collegeName:selectedCollege.name,
         examScore:examScore,
@@ -190,10 +197,11 @@ const Colleges = (id) => {
                       {college.location || "N/A"}
                     </td>
                     <td className="px-6 py-3 text-black">
-                      {college.degreeModes.join(", ") || "N/A"}
-                    </td>
+                      Online,Hybrid, Offline
+                       </td>
                     <td className="px-6 py-3 text-black">
-                      {college.courses.join(", ") || "N/A"}
+                    {college.courses?.map(course => course?.name).filter(Boolean).join(", ") || "N/A"}
+                   
                     </td>
                     <td className="px-6 py-3 text-black">
                       {college.applicationStatus === "Apply Now" ? (
@@ -227,62 +235,84 @@ const Colleges = (id) => {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4 text-black">
-              Application for {selectedCollege.name}
-            </h2>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1 text-black">
-                Select Exam Type
-              </label>
-              <select
-                value={examType}
-                onChange={(e) => setExamType(e.target.value)}
-                className="w-full border text-black border-gray-300 rounded-lg px-3 py-2"
-              >
-                <option value="JEE Mains">JEE Mains</option>
-                <option value="JEE Advance">JEE Advance</option>
-                <option value="COMED">COMED</option>
-                <option value="SAT">SAT</option>
-              </select>
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1 text-black">Exam Score</label>
-              <input
-                type="number"
-                value={examScore}
-                onChange={(e) => setExamScore(e.target.value)}
-                className="w-full text-black border border-gray-300 rounded-lg px-3 py-2"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1 text-black">
-                Additional Details
-              </label>
-              <textarea
-                value={additionalDetails}
-                onChange={(e) => setAdditionalDetails(e.target.value)}
-                className="w-full text-black border border-gray-300 rounded-lg px-3 py-2"
-                rows="3"
-              />
-            </div>
-            <div className="flex justify-end gap-4">
-              <button
-                className="bg-gray-300 px-4 py-2 rounded-lg"
-                onClick={() => setShowModal(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-                onClick={handleSubmitModal}
-              >
-                Submit
-              </button>
-            </div>
-          </div>
-        </div>
+         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+         <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+           <h2 className="text-xl font-bold mb-4 text-black">
+             Application for {selectedCollege.name}
+           </h2>
+           
+           <div className="mb-4">
+             <label className="block text-sm font-medium mb-1 text-black">
+               Select Course
+             </label>
+             <select
+               value={selectedCourse}
+               onChange={(e) => setSelectedCourse(e.target.value)}
+               className="w-full border text-black border-gray-300 rounded-lg px-3 py-2"
+             >
+               <option value="" disabled>Select a course</option>
+               {selectedCollege.courses.map((course) => (
+                 <option key={course.id} value={course.name}>
+                   {course.name}
+                 </option>
+               ))}
+             </select>
+           </div>
+   
+           <div className="mb-4">
+             <label className="block text-sm font-medium mb-1 text-black">
+               Select Exam Type
+             </label>
+             <select
+               value={examType}
+               onChange={(e) => setExamType(e.target.value)}
+               className="w-full border text-black border-gray-300 rounded-lg px-3 py-2"
+             >
+               <option value="JEE Mains">JEE Mains</option>
+               <option value="JEE Advance">JEE Advance</option>
+               <option value="COMED">COMED</option>
+               <option value="SAT">SAT</option>
+             </select>
+           </div>
+   
+           <div className="mb-4">
+             <label className="block text-sm font-medium mb-1 text-black">Exam Score</label>
+             <input
+               type="number"
+               value={examScore}
+               onChange={(e) => setExamScore(e.target.value)}
+               className="w-full text-black border border-gray-300 rounded-lg px-3 py-2"
+             />
+           </div>
+   
+           <div className="mb-4">
+             <label className="block text-sm font-medium mb-1 text-black">
+               Additional Details
+             </label>
+             <textarea
+               value={additionalDetails}
+               onChange={(e) => setAdditionalDetails(e.target.value)}
+               className="w-full text-black border border-gray-300 rounded-lg px-3 py-2"
+               rows="3"
+             />
+           </div>
+   
+           <div className="flex justify-end gap-4">
+             <button
+               className="bg-gray-300 px-4 py-2 rounded-lg"
+               onClick={() => setShowModal(false)}
+             >
+               Cancel
+             </button>
+             <button
+               className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+               onClick={handleSubmitModal}
+             >
+               Submit
+             </button>
+           </div>
+         </div>
+       </div>
       )}
     </div>
   );

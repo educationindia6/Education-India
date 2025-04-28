@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { FaBars, FaSignOutAlt, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import {IoMdNotifications} from 'react-icons/io'
 import ApplicationForm from "../../components/AplicationForm";
 import Cookies from "js-cookie";
 import jwt from "jsonwebtoken";
@@ -21,6 +22,7 @@ const Dashboard = () => {
   const [generalOpen, setGeneralOpen] = useState(false);
   const [docsOpen, setDocsOpen] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [messages, setMessages] = useState([]);
   const [userID, setUserID] = useState("");
   const [profileComplete, setProfileComplete] = useState(false); // To track profile completion
   const [userEmail, setUserEmail] = useState(null); // Store user email
@@ -48,7 +50,10 @@ const Dashboard = () => {
             
             if(user?.profileCompleted){
                 setProfileComplete(true)
+                console.log(user.messages)
+                setMessages(user.messages)
             }
+            
             setUserEmail(decodedToken.email); // Assuming email is in the payload
             setUserID(decodedToken.id);
           } else {
@@ -57,8 +62,11 @@ const Dashboard = () => {
         } catch (error) {
           console.error("Error decoding token:", error);
         }
+       
       }
     };
+
+
 
     initializeDashboard();
   }, [router]);
@@ -84,6 +92,7 @@ const Dashboard = () => {
         <div className="p-6">
           <h1 className="text-xl font-semibold">Dashboard</h1>
         </div>
+      
         <nav className="space-y-2 p-4">
           {/* General Section */}
           <div>
@@ -181,6 +190,13 @@ const Dashboard = () => {
                 <span className="text-white">{userEmail}</span>
               )}
             </div>
+            {messages? 
+        <IoMdNotifications onClick={()=>{
+          alert(messages)
+          console.log(messages)
+        }}/>
+
+        :<></>}
             {/* Logout Button */}
             <button
               onClick={handleLogout}

@@ -20,7 +20,8 @@ const CollegeDashboard = () => {
             id: decodedToken,
           });
           SetInfo(res.data.college);
-          console.log(res.data.college);
+
+          console.log(res.data.college.enrollments);
         }
       } catch (error) {
         console.error("Error fetching college info:", error);
@@ -37,7 +38,6 @@ const CollegeDashboard = () => {
         id: userID,
         applicationId: applicationID,
       });
-      console.log(res);
       setModalMessage("Student Accepted"); // Set the modal message
       setModalVisible(true); // Show the modal
     } catch (error) {
@@ -156,7 +156,7 @@ const CollegeDashboard = () => {
                       </td>
                       <td className="px-6 py-3 text-black">{el.examScore}</td>
                       <td className="px-6 py-3 text-black">{el.examType}</td>
-                      <td className="px-6 py-3 text-black">B.Tech CSE</td>
+                      <td className="px-6 py-3 text-black">{el.opted}</td>
                       <td className="px-6 py-3 text-black">{el.Aditional}</td>
                       <td className="px-6 py-3 text-black">{el.status}</td>
                       <td className="px-6 py-3">
@@ -203,7 +203,7 @@ const CollegeDashboard = () => {
                   info.enrollments.map((student, index) => (
                     <tr key={index} className="border-t hover:bg-gray-100">
                       <td className="px-6 py-3 text-black">{student.user.email}</td>
-                      <td className="px-6 py-3 text-black">Btech. CSE</td>
+                      <td className="px-6 py-3 text-black">{student.courseEnrollments}</td>
                       <td className="px-6 py-3 text-black">
                         {new Date(student.enrolledAt
 ).toLocaleDateString()}
